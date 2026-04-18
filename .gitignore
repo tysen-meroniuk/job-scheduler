@@ -1,0 +1,21 @@
+# Go
+bin/
+*.exe
+*.out
+*.test
+
+# Dashboard
+dashboard/node_modules/
+dashboard/dist/
+
+# Embedded dashboard (populated by `make build-dashboard`)
+internal/web/static/*
+!internal/web/static/.gitkeep
+
+# Env
+.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

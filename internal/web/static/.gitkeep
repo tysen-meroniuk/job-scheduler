@@ -1,0 +1,2 @@
+Placeholder so `//go:embed all:static` has at least one file to match
+before the React dashboard is built.

@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: jobqueue
+      POSTGRES_PASSWORD: jobqueue
+      POSTGRES_DB: jobqueue
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobqueue"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  migrate:
+    build: .
+    command: ["migrate", "up"]
+    environment:
+      DATABASE_URL: postgres://jobqueue:jobqueue@postgres:5432/jobqueue?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: .
+    command: ["api"]
+    environment:
+      DATABASE_URL: postgres://jobqueue:jobqueue@postgres:5432/jobqueue?sslmode=disable
+      PORT: "8080"
+      LOG_LEVEL: info
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    build: .
+    command: ["worker"]
+    environment:
+      DATABASE_URL: postgres://jobqueue:jobqueue@postgres:5432/jobqueue?sslmode=disable
+      LOG_LEVEL: info
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
